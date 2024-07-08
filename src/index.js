@@ -1,8 +1,8 @@
-require('dotenv').config();
+require("dotenv").config();
 const fs = require("node:fs");
 const path = require("node:path");
 const { Client, Collection, GatewayIntentBits } = require("discord.js");
-const { parseEnv } = require('node:util');
+const { parseEnv } = require("node:util");
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers],
@@ -44,5 +44,4 @@ for (const file of eventFiles) {
     client.on(event.name, (...args) => event.execute(...args));
   }
 }
-
 client.login(process.env.TOKEN);

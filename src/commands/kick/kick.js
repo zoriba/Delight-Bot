@@ -43,15 +43,17 @@ module.exports = {
     }
     let reason = interaction.options.getString("reason");
     if (!reason) reason = "No reason specified";
-
     const embedDM = new EmbedBuilder()
       .setTitle("You Have Been Kicked!")
       .setDescription(
         `**Server:** ${interaction.guild.name}\n **Reason:** ${reason}\n **Staff:** ${interaction.user.username}`
       );
 
-    const embed = new EmbedBuilder().setDescription("the user has been kicked");
-
+    const embed = new EmbedBuilder()
+      .setTitle("The User Has Been Kicked!")
+      .setDescription(
+        `**Server:** ${interaction.guild.name}\n **Reason:** ${reason}\n **Staff:** ${interaction.user.username}`
+      );
     await memberKick.send({ embeds: [embedDM] }).catch((err) => {
       return;
     });
