@@ -17,8 +17,8 @@ module.exports = {
       return option.setName("reason").setDescription("reason");
     }),
   async execute(interaction) {
-    const userBan = interaction.options.getUser("user");
-    const memberBan = interaction.guild.members.fetch(userBan.id);
+    const userBan = interaction.options.getMember("user");
+    const memberBan = await interaction.guild.members.fetch(userBan.id);
 
     if (
       !interaction.member.permissions.has(PermissionsBitField.Flags.BanMembers)
@@ -36,13 +36,7 @@ module.exports = {
       });
     }
 
-    if (!memberBan.bannable) {
-      return await interaction.reply({
-        content: "Cant ban this member",
-        ephemeral: true,
-      });
-    }
-    const reason = interaction.getString("reason");
+    const reason = interaction.options.getString("reason");
     const embedDM = new EmbedBuilder()
       .setTitle("You Have Been Banned!")
       .setDescription(
@@ -55,13 +49,14 @@ module.exports = {
         `**Server:** ${interaction.guild.name}\n **Reason:** ${reason}\n **Staff:** ${interaction.user.username}`
       );
 
-    await memberBan.send({ embeds: [embedDM] });
-    await memberBan.ban({ reason: reason }).catch((err) => {
-      interaction.reply({
-        content: "Error",
-        ephemeral: true,
+    await memberBan
+      .ban({ deleteMessageSeconds: 60 * 60 * 24 * 7, reason: [reason] })
+      .catch((err) => {
+        interaction.reply({
+          content: "Error",
+          ephemeral: true,
+        });
       });
-    });
     await interaction.reply({ embeds: [embed] });
   },
 };

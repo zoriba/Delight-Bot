@@ -18,7 +18,7 @@ module.exports = {
       option.setName("reason").setDescription("reason")
     ),
   async execute(interaction) {
-    const userKick = interaction.options.getUser("user");
+    const userKick = interaction.options.getMember("user");
     const memberKick = await interaction.guild.members.fetch(userKick.id);
 
     if (
