@@ -6,15 +6,15 @@ const {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("ban")
-    .setDescription("bans the user")
+    .setDescription("Bans a user from the server")
     .addUserOption((option) => {
       return option
         .setName("user")
-        .setDescription("the user you want to ban")
+        .setDescription("Enter the user you want to ban")
         .setRequired(true);
     })
     .addStringOption((option) => {
-      return option.setName("reason").setDescription("reason");
+      return option.setName("reason").setDescription("Enter the reason you want to ban the user");
     }),
   async execute(interaction) {
     const userBan = interaction.options.getMember("user");
@@ -58,5 +58,6 @@ module.exports = {
         });
       });
     await interaction.reply({ embeds: [embed] });
+    await memberBan.send({ embeds: [embed] });
   },
 };
