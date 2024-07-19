@@ -15,7 +15,9 @@ module.exports = {
         .setRequired(true)
     )
     .addStringOption((option) =>
-      option.setName("reason").setDescription("Enter the reason you want to ban the user")
+      option
+        .setName("reason")
+        .setDescription("Enter the reason you want to ban the user")
     ),
   async execute(interaction) {
     const userKick = interaction.options.getMember("user");
@@ -44,13 +46,15 @@ module.exports = {
     let reason = interaction.options.getString("reason");
     if (!reason) reason = "No reason specified";
     const embedDM = new EmbedBuilder()
+      .setColor("#B2A4D4")
       .setTitle("You Have Been Kicked!")
       .setDescription(
         `**Server:** ${interaction.guild.name}\n **Reason:** ${reason}\n **Staff:** ${interaction.user.username}`
       );
 
     const embed = new EmbedBuilder()
-      .setTitle("The User Has Been Kicked!")
+      .setColor("#B2A4D4")
+      .setTitle("The User Has Been Kicked")
       .setDescription(
         `**Server:** ${interaction.guild.name}\n **Reason:** ${reason}\n **Staff:** ${interaction.user.username}`
       );
