@@ -35,14 +35,12 @@ module.exports = {
         );
       }
 
-      await interaction.guild.bans
-        .remove(member)
-        .catch((err) =>
-          interaction.reply({
-            content: "Error while unbanning the user.",
-            ephemeral: true,
-          })
-        );
+      await interaction.guild.bans.remove(member).catch((err) =>
+        interaction.reply({
+          content: "Error while unbanning the user.",
+          ephemeral: true,
+        })
+      );
     });
   },
 };

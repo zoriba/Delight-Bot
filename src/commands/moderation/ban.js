@@ -14,7 +14,9 @@ module.exports = {
         .setRequired(true);
     })
     .addStringOption((option) => {
-      return option.setName("reason").setDescription("Enter the reason you want to ban the user");
+      return option
+        .setName("reason")
+        .setDescription("Enter the reason you want to ban the user");
     }),
   async execute(interaction) {
     const userBan = interaction.options.getMember("user");

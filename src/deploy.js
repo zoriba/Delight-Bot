@@ -1,7 +1,8 @@
-require('dotenv').config();
+require("dotenv").config();
 const { REST, Routes } = require("discord.js");
 const fs = require("node:fs");
 const path = require("node:path");
+const chalk = require("chalk");
 
 const commands = [];
 const foldersPath = path.join(__dirname, "commands");
@@ -19,7 +20,9 @@ for (const folder of commandFolders) {
       commands.push(command.data.toJSON());
     } else {
       console.log(
-        `[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`
+        chalk.red(
+          `[WARNING] The command at ${filePath} is missing a required "data" or "execute" property.`
+        )
       );
     }
   }
@@ -30,16 +33,23 @@ const rest = new REST().setToken(process.env.TOKEN);
 (async () => {
   try {
     console.log(
-      `Started refreshing ${commands.length} application (/) commands.`
+      chalk.grey(
+        `Started refreshing ${commands.length} application (/) commands.`
+      )
     );
 
     const data = await rest.put(
-      Routes.applicationGuildCommands(process.env.CLIENTID, process.env.GUILDID),
+      Routes.applicationGuildCommands(
+        process.env.CLIENTID,
+        process.env.GUILDID
+      ),
       { body: commands }
     );
 
     console.log(
-      `Successfully reloaded ${data.length} application (/) commands.`
+      chalk.green(
+        `Successfully reloaded ${data.length} application (/) commands.`
+      )
     );
   } catch (error) {
     console.error(error);
