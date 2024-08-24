@@ -39,6 +39,9 @@ module.exports = {
     }
 
     const reason = interaction.options.getString("reason");
+    if (reason === null) {
+      reason = "No reason Given";
+    }
     const embedDM = new EmbedBuilder()
       .setTitle("You Have Been Banned!")
       .setDescription(
@@ -46,6 +49,7 @@ module.exports = {
       );
 
     const embed = new EmbedBuilder()
+      .setColor("#B2A4D4")
       .setTitle("The User Has Been Banned!")
       .setDescription(
         `**Server:** ${interaction.guild.name}\n **Reason:** ${reason}\n **Staff:** ${interaction.user.username}`

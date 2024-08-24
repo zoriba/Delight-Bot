@@ -7,7 +7,7 @@ const {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("unban")
-    .setDescription("U  nban a user")
+    .setDescription("Unban a user")
     .addStringOption((option) => {
       return option
         .setName("user")
@@ -16,7 +16,12 @@ module.exports = {
     }),
   async execute(interaction) {
     const member = interaction.options.getString("user");
-
+    const embed = new EmbedBuilder()
+      .setColor("#B2A4D4")
+      .setTitle("The user has been unbanned")
+      .setDescription(
+        `**Server:** ${interaction.guild.name}\n **Staff:** ${interaction.user.username}`
+      );
     if (
       !interaction.member.permissions.has(PermissionsBitField.Flags.BanMembers)
     ) {
@@ -33,14 +38,15 @@ module.exports = {
         return await interaction.reply(
           "The user is not banned from the server"
         );
+      } else {
+        await interaction.guild.bans.remove(member).catch((err) =>
+          interaction.reply({
+            content: "Error while unbanning the user.",
+            ephemeral: true,
+          })
+        );
+        return await interaction.reply({ embeds: [embed] });
       }
-
-      await interaction.guild.bans.remove(member).catch((err) =>
-        interaction.reply({
-          content: "Error while unbanning the user.",
-          ephemeral: true,
-        })
-      );
     });
   },
 };
