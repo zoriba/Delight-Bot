@@ -8,10 +8,7 @@ module.exports = {
   async execute(client) {
     console.log(chalk.green(`Ready! Logged in as ${client.user.tag}`));
 
-    await mongoose.connect(mongoUrl || "", {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    });
+    await mongoose.connect(mongoUrl || "");
     if (mongoose.connect) {
       console.log(chalk.green("Connected to the DB"));
     }
