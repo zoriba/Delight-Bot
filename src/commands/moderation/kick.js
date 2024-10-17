@@ -20,9 +20,6 @@ module.exports = {
         .setDescription("Enter the reason you want to ban the user")
     ),
   async execute(interaction) {
-    const userKick = interaction.options.getMember("user");
-    const memberKick = await interaction.guild.members.fetch(userKick.id);
-
     if (
       !interaction.member.permissions.has(PermissionsBitField.Flags.KickMembers)
     ) {
@@ -31,6 +28,9 @@ module.exports = {
         ephemeral: true,
       });
     }
+    const userKick = interaction.options.getMember("user");
+    const memberKick = await interaction.guild.members.fetch(userKick.id);
+
     if (!memberKick) {
       return await interaction.reply({
         content: "The user is not in the server",
@@ -50,22 +50,32 @@ module.exports = {
       .setTitle("You Have Been Kicked!")
       .setDescription(
         `**Server:** ${interaction.guild.name}\n **Reason:** ${reason}\n **Staff:** ${interaction.user.username}`
-      );
+      )
+      .setAuthor({
+        name: "DelightBot",
+        iconURL:
+          "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fpng.pngtree.com%2Felement_our%2F20190528%2Fourmid%2Fpngtree-cute-cartoon-light-bulb-image_1134759.jpg&f=1&nofb=1&ipt=72d71ce7a39d017a3b63aa5294792ee087806e446b903b73679e0801746dc04d&ipo=images",
+      });
 
     const embed = new EmbedBuilder()
       .setColor("#B2A4D4")
       .setTitle("The User Has Been Kicked")
       .setDescription(
         `**Server:** ${interaction.guild.name}\n **Reason:** ${reason}\n **Staff:** ${interaction.user.username}`
-      );
-    await memberKick.send({ embeds: [embedDM] }).catch((err) => {
-      return;
+      )
+      .setAuthor({
+        name: "DelightBot",
+        iconURL:
+          "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fpng.pngtree.com%2Felement_our%2F20190528%2Fourmid%2Fpngtree-cute-cartoon-light-bulb-image_1134759.jpg&f=1&nofb=1&ipt=72d71ce7a39d017a3b63aa5294792ee087806e446b903b73679e0801746dc04d&ipo=images",
+      });
+    await memberKick.send({ embeds: [embed] }).catch((err) => {
+      console.log(`Could not send DM to the user: ${err.message}`);
     });
 
     await memberKick.kick({ reason: reason }).catch((err) => {
       interaction.reply({ content: "Error", ephemeral: true });
     });
 
-    await interaction.reply({ embeds: [embed] });
+    return await interaction.reply({ embeds: [embed] });
   },
 };

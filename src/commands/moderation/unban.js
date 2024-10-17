@@ -15,13 +15,6 @@ module.exports = {
         .setRequired(true);
     }),
   async execute(interaction) {
-    const member = interaction.options.getString("user");
-    const embed = new EmbedBuilder()
-      .setColor("#B2A4D4")
-      .setTitle("The user has been unbanned")
-      .setDescription(
-        `**Server:** ${interaction.guild.name}\n **Staff:** ${interaction.user.username}`
-      );
     if (
       !interaction.member.permissions.has(PermissionsBitField.Flags.BanMembers)
     ) {
@@ -29,6 +22,19 @@ module.exports = {
         content: "You dont have the permission to unban members",
       });
     }
+    const member = interaction.options.getString("user");
+    const embed = new EmbedBuilder()
+      .setColor("#B2A4D4")
+      .setTitle("The user has been unbanned")
+      .setDescription(
+        `**Server:** ${interaction.guild.name}\n **Staff:** ${interaction.user.username}`
+      )
+      .setAuthor({
+        name: "DelightBot",
+        iconURL:
+          "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fpng.pngtree.com%2Felement_our%2F20190528%2Fourmid%2Fpngtree-cute-cartoon-light-bulb-image_1134759.jpg&f=1&nofb=1&ipt=72d71ce7a39d017a3b63aa5294792ee087806e446b903b73679e0801746dc04d&ipo=images",
+      });
+
     await interaction.guild.bans.fetch().then(async (bans) => {
       if (bans.size == 0) {
         return await interaction.reply("No user is banned from the server");

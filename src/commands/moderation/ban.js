@@ -19,9 +19,6 @@ module.exports = {
         .setDescription("Enter the reason you want to ban the user");
     }),
   async execute(interaction) {
-    const userBan = interaction.options.getMember("user");
-    const memberBan = await interaction.guild.members.fetch(userBan.id);
-
     if (
       !interaction.member.permissions.has(PermissionsBitField.Flags.BanMembers)
     ) {
@@ -30,6 +27,8 @@ module.exports = {
         ephemeral: true,
       });
     }
+    const userBan = interaction.options.getMember("user");
+    const memberBan = await interaction.guild.members.fetch(userBan.id);
 
     if (!memberBan) {
       return await interaction.reply({
@@ -54,7 +53,9 @@ module.exports = {
       .setDescription(
         `**Server:** ${interaction.guild.name}\n **Reason:** ${reason}\n **Staff:** ${interaction.user.username}`
       );
-
+    await memberBan.send({ embeds: [embed] }).catch((err) => {
+      console.log(`Could not send DM to the user: ${err.message}`);
+    });
     await memberBan
       .ban({ deleteMessageSeconds: 60 * 60 * 24 * 7, reason: [reason] })
       .catch((err) => {
@@ -63,7 +64,6 @@ module.exports = {
           ephemeral: true,
         });
       });
-    await interaction.reply({ embeds: [embed] });
-    await memberBan.send({ embeds: [embed] });
+    return await interaction.reply({ embeds: [embed] });
   },
 };

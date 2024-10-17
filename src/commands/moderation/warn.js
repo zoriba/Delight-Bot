@@ -23,7 +23,6 @@ module.exports = {
         .setRequired(true)
     ),
   async execute(interaction) {
-    // Check if the user has the permission to warn
     if (
       !interaction.member.permissions.has(PermissionsBitField.Flags.KickMembers)
     ) {
@@ -39,14 +38,12 @@ module.exports = {
     const userTag = `${target.username}#${target.discriminator}`;
 
     try {
-      // Find the existing warning document or create a new one
       let data = await warningSchema.findOne({
         GuildId: guild.id,
         UserId: target.id,
       });
 
       if (!data) {
-        // If no document exists, create a new one with an initialized warnings array
         data = new warningSchema({
           GuildId: guild.id,
           UserId: target.id,
@@ -60,20 +57,23 @@ module.exports = {
           ],
         });
       } else {
-        // If a document exists, update it with the new warning
         const warnContent = {
           ExecuterId: user.id,
           ExecuterTag: user.tag,
           Reason: reason,
         };
-        data.warnings.push(warnContent); // Push new warning to the warnings array
+        data.warnings.push(warnContent);
       }
 
       await data.save();
 
-      // Notify the user via DM
       const embedDm = new EmbedBuilder()
         .setColor("#B2A4D4")
+        .setAuthor({
+          name: "DelightBot",
+          iconURL:
+            "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fpng.pngtree.com%2Felement_our%2F20190528%2Fourmid%2Fpngtree-cute-cartoon-light-bulb-image_1134759.jpg&f=1&nofb=1&ipt=72d71ce7a39d017a3b63aa5294792ee087806e446b903b73679e0801746dc04d&ipo=images",
+        })
         .setDescription(
           `**You Have Been Warned!**\n**Server:** ${guild.name}\n**Reason:** ${reason}\n**Staff:** ${user.username}`
         );
@@ -82,9 +82,13 @@ module.exports = {
         console.log(`Could not send DM to ${target.tag}: ${err.message}`);
       });
 
-      // Notify the server that the user has been warned
       const embed = new EmbedBuilder()
         .setColor("#B2A4D4")
+        .setAuthor({
+          name: "DelightBot",
+          iconURL:
+            "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fpng.pngtree.com%2Felement_our%2F20190528%2Fourmid%2Fpngtree-cute-cartoon-light-bulb-image_1134759.jpg&f=1&nofb=1&ipt=72d71ce7a39d017a3b63aa5294792ee087806e446b903b73679e0801746dc04d&ipo=images",
+        })
         .setDescription(
           `**User has been warned successfully :white_check_mark:**\n**User:** <@${target.id}>\n**Reason:** ${reason}\n**Staff:** ${user.username}`
         );
@@ -92,7 +96,7 @@ module.exports = {
       await interaction.reply({ embeds: [embed] });
     } catch (err) {
       console.error("An error occurred:", err);
-      await interaction.reply({
+      return await interaction.reply({
         content: "An error occurred while trying to warn the user.",
         ephemeral: true,
       });
