@@ -24,10 +24,10 @@ module.exports = {
     ),
   async execute(interaction) {
     if (
-      !interaction.member.permissions.has(PermissionsBitField.Flags.KickMembers)
+      !interaction.member.permissions.has(PermissionsBitField.Flags.BanMembers)
     ) {
       return await interaction.reply({
-        content: "You don't have the permission to timeout a user.",
+        content: "You dont have the permission to use this command",
         ephemeral: true,
       });
     }
@@ -35,7 +35,6 @@ module.exports = {
     const { options, guild, user } = interaction;
     const User = options.getUser("user");
     const member = await guild.members.fetch(User.id);
-    const duration = options.getString("duration");
     const reason = options.getString("reason") || "No reason given";
     if (!member) {
       return await interaction.reply({

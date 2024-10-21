@@ -42,10 +42,10 @@ module.exports = {
     ),
   async execute(interaction) {
     if (
-      !interaction.member.permissions.has(PermissionsBitField.Flags.KickMembers)
+      !interaction.member.permissions.has(PermissionsBitField.Flags.BanMembers)
     ) {
       return await interaction.reply({
-        content: "You don't have the permission to warn a user.",
+        content: "You dont have the permission to use this command",
         ephemeral: true,
       });
     }
