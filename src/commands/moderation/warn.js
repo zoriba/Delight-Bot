@@ -5,6 +5,7 @@ const {
 } = require("discord.js");
 
 const warningSchema = require("../../schemas/warnSchema");
+const logSchema = require("../../schemas/logSchema.js");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -92,7 +93,29 @@ module.exports = {
         .setDescription(
           `**User has been warned successfully :white_check_mark:**\n**User:** <@${target.id}>\n**Reason:** ${reason}\n**Staff:** ${user.username}`
         );
+      try {
+        const logData = await logSchema.findOne({
+          GuildId: interaction.guild.id,
+        });
 
+        if (!logData || !logData.Channel) {
+          console.log("Log channel not set.");
+          return;
+        }
+
+        const logChannel = interaction.guild.channels.cache.get(
+          logData.Channel
+        );
+
+        if (logChannel) {
+          // Send the embed to the log channel
+          await logChannel.send({ embeds: [embed] });
+        } else {
+          console.log("Log channel not found in guild.");
+        }
+      } catch (err) {
+        console.log(`Error logging the event: ${err.message}`);
+      }
       await interaction.reply({ embeds: [embed] });
     } catch (err) {
       console.error("An error occurred:", err);

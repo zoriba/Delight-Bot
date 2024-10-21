@@ -4,6 +4,8 @@ const {
   PermissionsBitField,
 } = require("discord.js");
 
+const logSchema = require("../../schemas/logSchema.js");
+
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("kick")
@@ -75,6 +77,27 @@ module.exports = {
     await memberKick.kick({ reason: reason }).catch((err) => {
       interaction.reply({ content: "Error", ephemeral: true });
     });
+
+    try {
+      const logData = await logSchema.findOne({
+        GuildId: interaction.guild.id,
+      });
+
+      if (!logData || !logData.Channel) {
+        console.log("Log channel not set.");
+        return;
+      }
+
+      const logChannel = interaction.guild.channels.cache.get(logData.Channel);
+
+      if (logChannel) {
+        await logChannel.send({ embeds: [embed] });
+      } else {
+        console.log("Log channel not found in guild.");
+      }
+    } catch (err) {
+      console.log(`Error logging the event: ${err.message}`);
+    }
 
     return await interaction.reply({ embeds: [embed] });
   },

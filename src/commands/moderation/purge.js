@@ -7,6 +7,8 @@ const {
   ButtonStyle,
 } = require("discord.js");
 
+const logSchema = require("../../schemas/logSchema.js");
+
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("purge")
@@ -41,6 +43,17 @@ module.exports = {
         `**Messages deleted successfully :white_check_mark:**\n**Staff:** ${user.username}`
       );
 
+    const embedLog = new EmbedBuilder()
+      .setColor("#B2A4D4")
+      .setAuthor({
+        name: "DelightBot",
+        iconURL:
+          "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fpng.pngtree.com%2Felement_our%2F20190528%2Fourmid%2Fpngtree-cute-cartoon-light-bulb-image_1134759.jpg&f=1&nofb=1&ipt=72d71ce7a39d017a3b63aa5294792ee087806e446b903b73679e0801746dc04d&ipo=images",
+      })
+      .setDescription(
+        `**Messages deleted in channel <#${interaction.channel.id}> :white_check_mark:**\n **Amount:**${count}\n**Staff:** ${user.username}`
+      );
+
     await interaction.channel.bulkDelete(count);
 
     const button = new ActionRowBuilder().addComponents(
@@ -68,5 +81,26 @@ module.exports = {
 
       interaction.deleteReply();
     });
+    try {
+      const logData = await logSchema.findOne({
+        GuildId: interaction.guild.id,
+      });
+
+      if (!logData || !logData.Channel) {
+        console.log("Log channel not set.");
+        return;
+      }
+
+      const logChannel = interaction.guild.channels.cache.get(logData.Channel);
+
+      if (logChannel) {
+        // Send the embed to the log channel
+        await logChannel.send({ embeds: [embedLog] });
+      } else {
+        console.log("Log channel not found in guild.");
+      }
+    } catch (err) {
+      console.log(`Error logging the event: ${err.message}`);
+    }
   },
 };
