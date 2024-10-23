@@ -103,16 +103,16 @@ module.exports = {
 
       if (!logData || !logData.Channel) {
         console.log("Log channel not set.");
-        return;
-      }
-
-      const logChannel = interaction.guild.channels.cache.get(logData.Channel);
-
-      if (logChannel) {
-        // Send the embed to the log channel
-        await logChannel.send({ embeds: [embed] });
       } else {
-        console.log("Log channel not found in guild.");
+        const logChannel = interaction.guild.channels.cache.get(
+          logData.Channel
+        );
+
+        if (logChannel) {
+          await logChannel.send({ embeds: [embed] });
+        } else {
+          console.log("Log channel not found in guild.");
+        }
       }
     } catch (err) {
       console.log(`Error logging the event: ${err.message}`);

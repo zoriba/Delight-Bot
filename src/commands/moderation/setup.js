@@ -18,7 +18,7 @@ module.exports = {
         .setRequired(true)
     ),
   async execute(interaction) {
-    const { user, guild, options } = interaction;
+    const { guild, options } = interaction;
     const guildId = guild.id;
     const Channel = options.getChannel("channel");
     const id = Channel.id;
@@ -39,7 +39,7 @@ module.exports = {
         { new: true, upsert: true }
       );
 
-      interaction.reply(``);
+      interaction.reply(`set`);
     } catch (err) {
       console.log(err);
     }
