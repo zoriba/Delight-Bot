@@ -25,7 +25,7 @@ module.exports = {
     ),
   async execute(interaction) {
     if (
-      !interaction.member.permissions.has(PermissionsBitField.Flags.BanMembers)
+      !interaction.member.permissions.has(PermissionsBitField.Flags.KickMembers)
     ) {
       return await interaction.reply({
         content: "You dont have the permission to use this command",

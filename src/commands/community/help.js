@@ -48,6 +48,11 @@ module.exports = {
         iconURL:
           "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fpng.pngtree.com%2Felement_our%2F20190528%2Fourmid%2Fpngtree-cute-cartoon-light-bulb-image_1134759.jpg&f=1&nofb=1&ipt=72d71ce7a39d017a3b63aa5294792ee087806e446b903b73679e0801746dc04d&ipo=images",
       })
+      .addFields({ name: "/role", value: "Assign a role to A Server Member" })
+      .addFields({
+        name: "/removerole",
+        value: "Remove a role from A Server Member",
+      })
       .addFields({ name: "/kick", value: "Kick A Server Member" })
       .addFields({ name: "/ban", value: "Ban a user from the server" })
       .addFields({ name: "/unban", value: "Unban a user from the server" })

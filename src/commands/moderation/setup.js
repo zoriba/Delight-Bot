@@ -18,6 +18,16 @@ module.exports = {
         .setRequired(true)
     ),
   async execute(interaction) {
+    if (
+      !interaction.member.permissions.has(
+        PermissionsBitField.Flags.Administrator
+      )
+    ) {
+      return await interaction.reply({
+        content: "You dont have the permission to use this command",
+        ephemeral: true,
+      });
+    }
     const { guild, options } = interaction;
     const guildId = guild.id;
     const Channel = options.getChannel("channel");

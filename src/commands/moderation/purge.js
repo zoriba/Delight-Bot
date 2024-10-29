@@ -17,6 +17,8 @@ module.exports = {
       option
         .setName("amount")
         .setDescription("The amount of messages you want to purge")
+        .setMaxValue(100)
+        .setMinValue(1)
         .setRequired(true)
     ),
   async execute(interaction) {
@@ -40,7 +42,7 @@ module.exports = {
           "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fpng.pngtree.com%2Felement_our%2F20190528%2Fourmid%2Fpngtree-cute-cartoon-light-bulb-image_1134759.jpg&f=1&nofb=1&ipt=72d71ce7a39d017a3b63aa5294792ee087806e446b903b73679e0801746dc04d&ipo=images",
       })
       .setDescription(
-        `**Messages deleted successfully :white_check_mark:**\n**Staff:** ${user.username}`
+        `**Messages deleted successfully :white_check_mark:**\n**Amount**: ${count}\n **Staff:** ${user.username}`
       );
 
     const embedLog = new EmbedBuilder()
@@ -94,7 +96,7 @@ module.exports = {
         );
 
         if (logChannel) {
-          await logChannel.send({ embeds: [embed] });
+          await logChannel.send({ embeds: [embedLog] });
         } else {
           console.log("Log channel not found in guild.");
         }
