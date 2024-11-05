@@ -2,9 +2,7 @@ require("dotenv").config();
 const fs = require("node:fs");
 const path = require("node:path");
 const { Client, Collection, GatewayIntentBits } = require("discord.js");
-const { parseEnv } = require("node:util");
 const chalk = require("chalk");
-const mongoose = require("mongoose");
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers],

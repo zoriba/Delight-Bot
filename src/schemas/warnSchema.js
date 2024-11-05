@@ -1,9 +1,9 @@
 const { model, Schema } = require("mongoose");
 
 let warningSchema = new Schema({
-  GuildId: "String",
-  UserId: "String",
-  UserTag: "String",
+  GuildId: String,
+  UserId: String,
+  UserTag: String,
   warnings: [
     {
       ExecuterId: String,
