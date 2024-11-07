@@ -3,6 +3,8 @@ const fs = require("node:fs");
 const path = require("node:path");
 const { Client, Collection, GatewayIntentBits } = require("discord.js");
 const chalk = require("chalk");
+const express = require("express");
+const app = express();
 
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMembers],
@@ -47,3 +49,13 @@ for (const file of eventFiles) {
   }
 }
 client.login(process.env.TOKEN);
+
+app.use(express.static(path.join(__dirname, "public")));
+
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "web", "index.html"));
+});
+
+app.listen(precess.env.PORT, () => {
+  console.log(`Server is running on http://localhost:${PORT}`);
+});
