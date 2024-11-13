@@ -25,6 +25,8 @@ module.exports = {
         UserId: target.id,
       });
 
+      console.log(data);
+
       if (data && Array.isArray(data.warnings)) {
         embed
           .setColor("#B2A4D4")

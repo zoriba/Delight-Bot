@@ -1,10 +1,7 @@
-const {
-  SlashCommandBuilder,
-  EmbedBuilder,
-  PermissionsBitField,
-} = require("discord.js");
-
-const logSchema = require("../../schemas/logSchema.js");
+const { SlashCommandBuilder } = require("discord.js");
+const { checkPermissions } = require("../../utils/validators");
+const { buildEmbed } = require("../../utils/embeds");
+const { logEvent } = require("../../utils/logs");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -25,14 +22,7 @@ module.exports = {
         )
     ),
   async execute(interaction) {
-    if (
-      !interaction.member.permissions.has(PermissionsBitField.Flags.KickMembers)
-    ) {
-      return await interaction.reply({
-        content: "You dont have the permission to use this command",
-        ephemeral: true,
-      });
-    }
+    checkPermissions(interaction, "KickMembers");
 
     const { options, guild, user } = interaction;
     const User = options.getUser("user");
@@ -52,39 +42,14 @@ module.exports = {
       });
     }
 
-    const embed = new EmbedBuilder()
-      .setColor("#B2A4D4")
-      .setAuthor({
-        name: "DelightBot",
-        iconURL:
-          "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fpng.pngtree.com%2Felement_our%2F20190528%2Fourmid%2Fpngtree-cute-cartoon-light-bulb-image_1134759.jpg&f=1&nofb=1&ipt=72d71ce7a39d017a3b63aa5294792ee087806e446b903b73679e0801746dc04d&ipo=images",
-      })
-      .setDescription(
-        `**The user's timeout removed successfully :white_check_mark:**\n**User:** <@${member.id}>\n**Reason:** ${reason}\n**Staff:** ${user.username}`
-      );
+    const embed = buildEmbed(
+      `**The user's timeout removed successfully :white_check_mark:**\n**User:** <@${member.id}>\n**Reason:** ${reason}\n**Staff:** ${user.username}`
+    );
 
     await member.timeout(null, reason);
-    try {
-      const logData = await logSchema.findOne({
-        GuildId: interaction.guild.id,
-      });
 
-      if (!logData || !logData.Channel) {
-        console.log("Log channel not set.");
-      } else {
-        const logChannel = interaction.guild.channels.cache.get(
-          logData.Channel
-        );
+    await logEvent(interaction, embed);
 
-        if (logChannel) {
-          await logChannel.send({ embeds: [embed] });
-        } else {
-          console.log("Log channel not found in guild.");
-        }
-      }
-    } catch (err) {
-      console.log(`Error logging the event: ${err.message}`);
-    }
     return await interaction.reply({ embeds: [embed] });
   },
 };

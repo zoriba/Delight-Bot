@@ -1,7 +1,6 @@
 const {
   SlashCommandBuilder,
   EmbedBuilder,
-  PermissionsBitField,
   ButtonBuilder,
   ActionRowBuilder,
   ButtonStyle,
@@ -11,7 +10,7 @@ module.exports = {
   data: new SlashCommandBuilder()
     .setName("help")
     .setDescription("Get help about the commands"),
-  async execute(interaction, client) {
+  async execute(interaction) {
     const embed = new EmbedBuilder()
       .setColor("#B2A4D4")
       .setTitle("Help Interface")

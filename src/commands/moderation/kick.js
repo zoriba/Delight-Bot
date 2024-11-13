@@ -1,10 +1,7 @@
-const {
-  SlashCommandBuilder,
-  EmbedBuilder,
-  PermissionsBitField,
-} = require("discord.js");
-
-const logSchema = require("../../schemas/logSchema.js");
+const { SlashCommandBuilder } = require("discord.js");
+const { logEvent } = require("../../utils/logs.js");
+const { checkPermissions } = require("../../utils/validators.js");
+const { buildEmbed } = require("../../utils/embeds.js");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -22,16 +19,12 @@ module.exports = {
         .setDescription("Enter the reason you want to ban the user")
     ),
   async execute(interaction) {
-    if (
-      !interaction.member.permissions.has(PermissionsBitField.Flags.KickMembers)
-    ) {
-      return await interaction.reply({
-        content: "You are not permitted to use this command",
-        ephemeral: true,
-      });
-    }
-    const userKick = interaction.options.getMember("user");
-    const memberKick = await interaction.guild.members.fetch(userKick.id);
+    checkPermissions(interaction, "KickMembers");
+
+    const { options, guild, user } = interaction;
+    const userKick = options.getMember("user");
+    const memberKick = await guild.members.fetch(userKick.id);
+    const reason = options.getString("reason") || "No reason specified";
 
     if (!memberKick) {
       return await interaction.reply({
@@ -45,60 +38,22 @@ module.exports = {
         ephemeral: true,
       });
     }
-    let reason = interaction.options.getString("reason");
-    if (!reason) reason = "No reason specified";
-    const embedDM = new EmbedBuilder()
-      .setColor("#B2A4D4")
-      .setTitle("You Have Been Kicked!")
-      .setDescription(
-        `**Server:** ${interaction.guild.name}\n **Reason:** ${reason}\n **Staff:** ${interaction.user.username}`
-      )
-      .setAuthor({
-        name: "DelightBot",
-        iconURL:
-          "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fpng.pngtree.com%2Felement_our%2F20190528%2Fourmid%2Fpngtree-cute-cartoon-light-bulb-image_1134759.jpg&f=1&nofb=1&ipt=72d71ce7a39d017a3b63aa5294792ee087806e446b903b73679e0801746dc04d&ipo=images",
-      });
 
-    const embed = new EmbedBuilder()
-      .setColor("#B2A4D4")
-      .setTitle("The User Has Been Kicked")
-      .setDescription(
-        `**Server:** ${interaction.guild.name}\n **Reason:** ${reason}\n **Staff:** ${interaction.user.username}`
-      )
-      .setAuthor({
-        name: "DelightBot",
-        iconURL:
-          "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fpng.pngtree.com%2Felement_our%2F20190528%2Fourmid%2Fpngtree-cute-cartoon-light-bulb-image_1134759.jpg&f=1&nofb=1&ipt=72d71ce7a39d017a3b63aa5294792ee087806e446b903b73679e0801746dc04d&ipo=images",
-      });
-    await memberKick.send({ embeds: [embed] }).catch((err) => {
-      console.log(`Could not send DM to the user: ${err.message}`);
-    });
+    const embedDM = buildEmbed(
+      `**Server:** ${guild.name}\n **Reason:** ${reason}\n **Staff:** ${user.tag}`,
+      "You Have Been Kicked!"
+    );
+
+    const embed = buildEmbed(
+      `**Server:** ${guild.name}\n **Reason:** ${reason}\n **Staff:** ${user.tag}`,
+      "The User Has Been Kicked"
+    );
 
     await memberKick.kick({ reason: reason }).catch((err) => {
       interaction.reply({ content: "Error", ephemeral: true });
     });
 
-    try {
-      const logData = await logSchema.findOne({
-        GuildId: interaction.guild.id,
-      });
-
-      if (!logData || !logData.Channel) {
-        console.log("Log channel not set.");
-      } else {
-        const logChannel = interaction.guild.channels.cache.get(
-          logData.Channel
-        );
-
-        if (logChannel) {
-          await logChannel.send({ embeds: [embed] });
-        } else {
-          console.log("Log channel not found in guild.");
-        }
-      }
-    } catch (err) {
-      console.log(`Error logging the event: ${err.message}`);
-    }
+    await logEvent(interaction, embed);
 
     return await interaction.reply({ embeds: [embed] });
   },

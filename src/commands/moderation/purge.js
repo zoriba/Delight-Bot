@@ -1,13 +1,13 @@
 const {
   SlashCommandBuilder,
-  EmbedBuilder,
   PermissionsBitField,
   ButtonBuilder,
   ActionRowBuilder,
   ButtonStyle,
 } = require("discord.js");
-
-const logSchema = require("../../schemas/logSchema.js");
+const { checkPermissions } = require("../../utils/validators.js");
+const { logEvent } = require("../../utils/logs.js");
+const { buildEmbed } = require("../../utils/embeds.js");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -22,39 +22,20 @@ module.exports = {
         .setRequired(true)
     ),
   async execute(interaction) {
-    if (
-      !interaction.member.permissions.has(PermissionsBitField.Flags.KickMembers)
-    ) {
-      return await interaction.reply({
-        content: "You are not permitted to use this command",
-        ephemeral: true,
-      });
-    }
+    checkPermissions(interaction, "ManageMessages");
 
     const { user, options } = interaction;
     const count = options.getInteger("amount");
 
-    const embed = new EmbedBuilder()
-      .setColor("#B2A4D4")
-      .setAuthor({
-        name: "DelightBot",
-        iconURL:
-          "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fpng.pngtree.com%2Felement_our%2F20190528%2Fourmid%2Fpngtree-cute-cartoon-light-bulb-image_1134759.jpg&f=1&nofb=1&ipt=72d71ce7a39d017a3b63aa5294792ee087806e446b903b73679e0801746dc04d&ipo=images",
-      })
-      .setDescription(
-        `**Messages deleted successfully :white_check_mark:**\n**Amount**: ${count}\n **Staff:** ${user.username}`
-      );
+    const embed = buildEmbed(
+      `**Amount**: ${count}\n **Staff:** ${user.username}`,
+      "Messages deleted successfully :white_check_mark:"
+    );
 
-    const embedLog = new EmbedBuilder()
-      .setColor("#B2A4D4")
-      .setAuthor({
-        name: "DelightBot",
-        iconURL:
-          "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fpng.pngtree.com%2Felement_our%2F20190528%2Fourmid%2Fpngtree-cute-cartoon-light-bulb-image_1134759.jpg&f=1&nofb=1&ipt=72d71ce7a39d017a3b63aa5294792ee087806e446b903b73679e0801746dc04d&ipo=images",
-      })
-      .setDescription(
-        `**Messages deleted in channel <#${interaction.channel.id}> :white_check_mark:**\n **Amount:**${count}\n**Staff:** ${user.username}`
-      );
+    const embedLog = buildEmbed(
+      `**Amount:**${count}\n**Staff:** ${user.username}`,
+      `Messages deleted in channel <#${interaction.channel.id}> :white_check_mark:`
+    );
 
     await interaction.channel.bulkDelete(count);
 
@@ -83,26 +64,6 @@ module.exports = {
 
       interaction.deleteReply();
     });
-    try {
-      const logData = await logSchema.findOne({
-        GuildId: interaction.guild.id,
-      });
-
-      if (!logData || !logData.Channel) {
-        console.log("Log channel not set.");
-      } else {
-        const logChannel = interaction.guild.channels.cache.get(
-          logData.Channel
-        );
-
-        if (logChannel) {
-          await logChannel.send({ embeds: [embedLog] });
-        } else {
-          console.log("Log channel not found in guild.");
-        }
-      }
-    } catch (err) {
-      console.log(`Error logging the event: ${err.message}`);
-    }
+    await logEvent(interaction, embed);
   },
 };

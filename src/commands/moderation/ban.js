@@ -1,10 +1,7 @@
-const {
-  SlashCommandBuilder,
-  PermissionsBitField,
-  EmbedBuilder,
-} = require("discord.js");
-
-const logSchema = require("../../schemas/logSchema.js");
+const { SlashCommandBuilder } = require("discord.js");
+const { checkPermissions } = require("../../utils/validators.js");
+const { logEvent } = require("../../utils/logs.js");
+const { buildEmbed } = require("../../utils/embeds.js");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -22,16 +19,12 @@ module.exports = {
         .setDescription("Enter the reason you want to ban the user");
     }),
   async execute(interaction) {
-    if (
-      !interaction.member.permissions.has(PermissionsBitField.Flags.BanMembers)
-    ) {
-      return await interaction.reply({
-        content: "You dont have the permission to use this command",
-        ephemeral: true,
-      });
-    }
-    const userBan = interaction.options.getMember("user");
-    const memberBan = await interaction.guild.members.fetch(userBan.id);
+    checkPermissions(interaction, "BanMembers");
+
+    const { options, guild, user } = interaction;
+    const userBan = options.getMember("user");
+    const memberBan = await guild.members.fetch(userBan.id);
+    const reason = options.getString("reason") || "No reason given";
 
     if (!memberBan) {
       return await interaction.reply({
@@ -40,63 +33,31 @@ module.exports = {
       });
     }
 
-    const reason = interaction.options.getString("reason") || "No reason given";
+    const embedDM = buildEmbed(
+      `**Server:** ${guild.name}\n **Reason:** ${reason}\n **Staff:** ${user.tag}`,
+      "You Have Been Banned!"
+    );
 
-    const embedDM = new EmbedBuilder()
-      .setTitle("You Have Been Banned!")
-      .setDescription(
-        `**Server:** ${interaction.guild.name}\n **Reason:** ${reason}\n **Staff:** ${interaction.user.username}`
-      )
-      .setAuthor({
-        name: "DelightBot",
-        iconURL:
-          "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fpng.pngtree.com%2Felement_our%2F20190528%2Fourmid%2Fpngtree-cute-cartoon-light-bulb-image_1134759.jpg&f=1&nofb=1&ipt=72d71ce7a39d017a3b63aa5294792ee087806e446b903b73679e0801746dc04d&ipo=images",
-      });
+    const embed = buildEmbed(
+      `**Server:** ${guild.name}\n **Reason:** ${reason}\n **Staff:** ${user.tag}`,
+      "The User Has Been Banned!"
+    );
 
-    const embed = new EmbedBuilder()
-      .setColor("#B2A4D4")
-      .setTitle("The User Has Been Banned!")
-      .setDescription(
-        `**Server:** ${interaction.guild.name}\n **Reason:** ${reason}\n **Staff:** ${interaction.user.username}`
-      )
-      .setAuthor({
-        name: "DelightBot",
-        iconURL:
-          "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fpng.pngtree.com%2Felement_our%2F20190528%2Fourmid%2Fpngtree-cute-cartoon-light-bulb-image_1134759.jpg&f=1&nofb=1&ipt=72d71ce7a39d017a3b63aa5294792ee087806e446b903b73679e0801746dc04d&ipo=images",
-      });
-    await memberBan.send({ embeds: [embed] }).catch((err) => {
-      console.log(`Could not send DM to the user: ${err.message}`);
+    await memberBan.send({ embeds: [embedDM] }).catch((err) => {
+      console.log(`Could not send DM to the user: ${err}`);
     });
     await memberBan
       .ban({ deleteMessageSeconds: 60 * 60 * 24 * 7, reason: [reason] })
       .catch((err) => {
+        console.log(err);
         interaction.reply({
           content: "Error",
           ephemeral: true,
         });
       });
 
-    try {
-      const logData = await logSchema.findOne({
-        GuildId: interaction.guild.id,
-      });
+    await logEvent(interaction, embed);
 
-      if (!logData || !logData.Channel) {
-        console.log("Log channel not set.");
-      } else {
-        const logChannel = interaction.guild.channels.cache.get(
-          logData.Channel
-        );
-
-        if (logChannel) {
-          await logChannel.send({ embeds: [embed] });
-        } else {
-          console.log("Log channel not found in guild.");
-        }
-      }
-    } catch (err) {
-      console.log(`Error logging the event: ${err.message}`);
-    }
     return await interaction.reply({ embeds: [embed] });
   },
 };
