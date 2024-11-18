@@ -1,7 +1,7 @@
 const { Events } = require("discord.js");
 const chalk = require("chalk");
 const mongoose = require("mongoose");
-const mongoUrl = process.env.mongoUrl;
+const mongoUrl = process.env.MongoURL;
 module.exports = {
   name: Events.ClientReady,
   once: true,
@@ -12,8 +12,6 @@ module.exports = {
       console.log(chalk.red("[Warning] Could not connect to the database!"));
       console.log(err);
     });
-    if (mongoose.connect) {
-      console.log(chalk.green("Connected to the DB"));
-    }
+    if (mongoose.connect) console.log(chalk.green("Connected to the DB"));
   },
 };
