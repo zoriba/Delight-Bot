@@ -8,6 +8,7 @@ const {
 const { checkPermissions } = require("../../utils/validators.js");
 const { logEvent } = require("../../utils/logs.js");
 const { buildEmbed } = require("../../utils/embeds.js");
+const chalk = require("chalk");
 
 module.exports = {
   data: new SlashCommandBuilder()
@@ -24,20 +25,40 @@ module.exports = {
   async execute(interaction) {
     checkPermissions(interaction, "ManageMessages");
 
-    const { user, options } = interaction;
+    const { user, options, channel, guild } = interaction;
     const count = options.getInteger("amount");
+    const messages = await channel.messages.fetch({ limit: count });
 
+    const now = Date.now();
+    const validMessages = messages.filter(
+      (msg) => now - msg.createdTimestamp < 14 * 24 * 60 * 60 * 1000
+    );
+    if (validMessages.size === 0) {
+      return interaction.reply({
+        embeds: [
+          buildEmbed(
+            "No valid messages found.",
+            "Could not delete messages in channel. :x: "
+          ),
+        ],
+        ephemeral: true,
+      });
+    }
     const embed = buildEmbed(
-      `**Amount**: ${count}\n **Staff:** ${user.username}`,
+      `**Amount**: ${validMessages.size}\n **Staff:** ${user.username}`,
       "Messages deleted successfully :white_check_mark:"
     );
 
     const embedLog = buildEmbed(
-      `**Amount:**${count}\n**Staff:** ${user.username}`,
-      `Messages deleted in channel <#${interaction.channel.id}> :white_check_mark:`
+      `**Amount:**${validMessages.size}\n**Staff:** ${user.username}`,
+      `Messages deleted in channel <#${channel.id}> :white_check_mark:`
     );
 
-    await interaction.channel.bulkDelete(count);
+    await interaction.channel.bulkDelete(validMessages, true).catch((err) => {
+      console.log(
+        chalk.redBright(`[${guild.name}] Error deleting messages: `) + err
+      );
+    });
 
     const button = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
@@ -54,16 +75,9 @@ module.exports = {
 
     collector.on("collect", async (i) => {
       if (i.customId == "purge") {
-        if (
-          !interaction.member.permissions.has(
-            PermissionsBitField.Flags.KickMembers
-          )
-        )
-          return;
+        if (i.user === user) interaction.deleteReply();
       }
-
-      interaction.deleteReply();
     });
-    await logEvent(interaction, embed);
+    await logEvent(interaction, embedLog);
   },
 };

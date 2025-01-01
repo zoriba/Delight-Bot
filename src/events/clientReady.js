@@ -9,8 +9,9 @@ module.exports = {
     console.log(chalk.green(`Ready! Logged in as ${client.user.tag}`));
 
     await mongoose.connect(mongoUrl || "").catch((err) => {
-      console.log(chalk.red("[Warning] Could not connect to the database!"));
-      console.log(err);
+      console.log(
+        chalk.red("[Warning]") + "Could not connect to the database!" + err
+      );
     });
     if (mongoose.connect) console.log(chalk.green("Connected to the DB"));
   },

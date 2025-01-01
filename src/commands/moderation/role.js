@@ -40,13 +40,25 @@ module.exports = {
             .setDescription("The role you want to remove")
             .setRequired(true)
         )
+    )
+    .addSubcommand((subcommand) =>
+      subcommand
+        .setName("info")
+        .setDescription("Show the info about a role.")
+        .addRoleOption((option) =>
+          option
+            .setName("role")
+            .setDescription("The role you want to get the info on.")
+            .setRequired(true)
+        )
     ),
   async execute(interaction) {
     checkPermissions(interaction, "ManageRoles");
 
     const { guild, options } = interaction;
     const userRole = options.getUser("user");
-    const memberRole = await guild.members.fetch(userRole.id);
+    let memberRole;
+    if (userRole) memberRole = (await guild.members.fetch(userRole.id)) || null;
     const role = options.getRole("role");
     const subcommand = options.getSubcommand();
     let embed;
@@ -97,6 +109,8 @@ module.exports = {
         `**User:** <@${memberRole.id}>\n **Reason:** <@&${role.id}>\n **Staff:** ${interaction.user.username}`,
         "Role removed successfully :white_check_mark:"
       );
+    } else if (subcommand === "info") {
+      console.log(role);
     }
     await logEvent(interaction, embed);
 

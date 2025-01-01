@@ -44,7 +44,9 @@ module.exports = {
     );
 
     await memberBan.send({ embeds: [embedDM] }).catch((err) => {
-      console.log(`Could not send DM to the user: ${err}`);
+      console.log(
+        chalk.redBright(`[${guild.name}] Could not send DM to user: \n`) + err
+      );
     });
     await memberBan
       .ban({ deleteMessageSeconds: 60 * 60 * 24 * 7, reason: [reason] })

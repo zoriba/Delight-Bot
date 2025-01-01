@@ -1,9 +1,13 @@
-const { Events, EmbedBuilder } = require("discord.js");
+const { Events } = require("discord.js");
 const greetSchema = require("../schemas/greetSchema.js");
 
 module.exports = {
   name: Events.GuildMemberAdd,
   async execute(member) {
+    const data = await greetSchema.findOne({ GuildID: member.guild.id });
+    if (!data || data.Toggle === false) {
+      return;
+    }
     function parsePlaceholders(message, data) {
       const placeholders = {
         "{user}": () => `<@${data.userId}>`,
@@ -21,7 +25,6 @@ module.exports = {
     const { username, id: userId } = member.user;
     const { name: serverName, memberCount } = member.guild;
     const joinDate = member.guild.joinedTimestamp;
-    const data = await greetSchema.findOne({ GuildID: member.guild.id });
 
     const channel = member.guild.channels.cache.get(data.Channel);
     if (!channel) {

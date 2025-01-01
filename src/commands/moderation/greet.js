@@ -47,10 +47,10 @@ module.exports = {
     let data = await greetSchema.findOne({ GuildID: guild.id });
     if (!data) {
       data = new greetSchema({ GuildID: guild.id });
-      await data.save;
+      await data.save();
     }
     if (subcommand === "toggle") {
-      const toggle = !data?.toggle;
+      const toggle = !data?.Toggle;
       await greetSchema.findOneAndUpdate(
         { GuildID: guild.id },
         { Toggle: toggle },
@@ -61,11 +61,6 @@ module.exports = {
         `**Greet module ${
           toggle ? "Enabled" : "Disabled"
         } successfully :white_check_mark:**`
-      );
-      await greetSchema.findOneAndUpdate(
-        { GuildID: guild.id },
-        { Toggle: toggle },
-        { new: true, upsert: true }
       );
     } else if (subcommand === "channel") {
       await greetSchema.findOneAndUpdate(
@@ -86,6 +81,7 @@ module.exports = {
         `**Greet message set successfully :white_check_mark: **`
       );
     }
+    logEvent(interaction, embed);
     return await interaction.reply({
       embeds: [embed],
     });

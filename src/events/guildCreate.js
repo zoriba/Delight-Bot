@@ -1,4 +1,10 @@
-const { Events, EmbedBuilder } = require("discord.js");
+const {
+  Events,
+  EmbedBuilder,
+  ActionRowBuilder,
+  ButtonBuilder,
+} = require("discord.js");
+const chalk = require("chalk");
 
 module.exports = {
   name: Events.GuildCreate,
@@ -11,7 +17,7 @@ module.exports = {
          Use  \`/help\` to see all the commands I offer!
          \n
          If you have any issues with the bot of found a bug 
-         kindly report it at our [support server](https://discord.gg/)
+         kindly report it at our support server.
          \n
          Have a great day!`
         )
@@ -28,17 +34,28 @@ module.exports = {
           defaultChannel = channel;
         }
       });
-
+      const button = new ActionRowBuilder().addComponents(
+        new ButtonBuilder().setName("Support server")
+      );
       if (defaultChannel) {
         await defaultChannel.send({ embeds: [embed] });
+        defaultChannel
+          .createInvite({ unique: true, temporary: false })
+          .then((invite) => {
+            console.log(
+              chalk.green(
+                `[${guild.name}] Bot added to Invite link: https://discord.gg/${invite.code}`
+              )
+            );
+          });
       } else {
         console.log(
-          `No appropriate channel found in ${guild.name} to send a welcome message.`
+          `[${guild.name}] No appropriate channel found in to send a welcome message.`
         );
       }
     } catch (error) {
       console.log(
-        `Error sending welcome message to guild ${guild.name}: ${error}`
+        `[${guild.name}] Error sending welcome message to guild : ${error}`
       );
     }
   },

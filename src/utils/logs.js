@@ -5,7 +5,6 @@ const logEvent = async (interaction, embed) => {
     GuildId: interaction.guild.id,
   });
 
-  console.log(logData.Channel);
   if (!logData || !logData.Channel) {
     console.log("Log channel not set.");
   } else {

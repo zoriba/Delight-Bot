@@ -2,7 +2,7 @@ const { SlashCommandBuilder } = require("discord.js");
 const { logEvent } = require("../../utils/logs.js");
 const { checkPermissions } = require("../../utils/validators.js");
 const { buildEmbed } = require("../../utils/embeds.js");
-
+const chalk = require("chalk");
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("kick")
@@ -48,6 +48,13 @@ module.exports = {
       `**Server:** ${guild.name}\n **Reason:** ${reason}\n **Staff:** ${user.tag}`,
       "The User Has Been Kicked"
     );
+    await memberKick.send({ embeds: [embed] }).catch((err) => {
+      console.log(
+        chalk.redBright(
+          `[${guild.name}] Could not send DM to user while kicking: \n`
+        ) + err
+      );
+    });
 
     await memberKick.kick({ reason: reason }).catch((err) => {
       interaction.reply({ content: "Error", ephemeral: true });
