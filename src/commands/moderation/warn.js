@@ -7,33 +7,56 @@ const { logEvent } = require("../../utils/logs.js");
 module.exports = {
   data: new SlashCommandBuilder()
     .setName("warn")
-    .setDescription("Warn a user")
-    .addUserOption((option) =>
-      option
-        .setName("user")
-        .setDescription("Select the user you want to warn")
-        .setRequired(true)
+    .setDescription("The warn module")
+    .addSubcommand((subcommand) =>
+      subcommand
+        .setName("add")
+        .setDescription("Warn a user")
+        .addUserOption((option) =>
+          option
+            .setName("user")
+            .setDescription("Select the user you want to warn")
+            .setRequired(true)
+        )
+        .addStringOption((option) =>
+          option
+            .setName("reason")
+            .setDescription("Enter the reason for the warning")
+            .setRequired(true)
+        )
     )
-    .addStringOption((option) =>
-      option
-        .setName("reason")
-        .setDescription("Enter the reason for the warning")
-        .setRequired(true)
+    .addSubcommand((subcommand) =>
+      subcommand
+        .setName("remove")
+        .setDescription("Remove a warning from a user")
+        .addUserOption((option) =>
+          option
+            .setName("user")
+            .setDescription("Select the user you want to remove a warn from")
+            .setRequired(true)
+        )
+        .addStringOption((option) =>
+          option
+            .setName("reason")
+            .setDescription("Enter the reason for the warning")
+            .setRequired(true)
+        )
     ),
   async execute(interaction) {
     checkPermissions(interaction, "KickMembers");
 
     const { options, guild, user } = interaction;
+    const subcommand = options.getSubcommand();
     const target = options.getUser("user");
     const reason = options.getString("reason");
-    const userTag = `${target.username}#${target.discriminator}`;
+    let embed;
 
-    try {
-      let data = await warningSchema.findOne({
-        GuildId: guild.id,
-        UserId: target.id,
-      });
+    let data = await warningSchema.findOne({
+      GuildId: guild.id,
+      UserId: target.id,
+    });
 
+    if (subcommand === "add") {
       if (!data) {
         data = new warningSchema({
           GuildId: guild.id,
@@ -44,6 +67,7 @@ module.exports = {
               ExecuterId: user.id,
               ExecuterTag: user.tag,
               Reason: reason,
+              warnId: 1,
             },
           ],
         });
@@ -52,33 +76,40 @@ module.exports = {
           ExecuterId: user.id,
           ExecuterTag: user.tag,
           Reason: reason,
+          warnId: data.warnings.length + 1,
         };
         data.warnings.push(warnContent);
+        console.log(data);
       }
-
-      await data.save();
+      warnId = data.warnings[data.warnings.length - 1].warnId;
 
       const embedDm = buildEmbed(
-        `**You Have Been Warned! :white_check_mark:**\n**Server:** ${guild.name}\n**Reason:** ${reason}\n**Staff:** ${user.username}`
+        `**You Have Been Warned! **\n**Server:** ${guild.name}\n**Reason:** ${reason}\n**Staff:** ${user.username}`
       );
 
       await target.send({ embeds: [embedDm] }).catch((err) => {
         console.log(`Could not send DM to ${target.tag}: ${err.message}`);
       });
 
-      const embed = buildEmbed(
-        `**User has been warned successfully :white_check_mark:**\n**User:** <@${target.id}>\n**Reason:** ${reason}\n**Staff:** ${user.username}`
+      embed = buildEmbed(
+        `**User has been warned successfully :white_check_mark:**\n**User:** <@${target.id}>\n**Reason:** ${reason}\n**Warn Id:**${warnId}\n **Staff:** ${user.username}`
       );
-
-      await logEvent(interaction, embed);
-
-      await interaction.reply({ embeds: [embed] });
-    } catch (err) {
-      console.error("An error occurred:", err);
-      return await interaction.reply({
-        content: "An error occurred while trying to warn the user.",
-        ephemeral: true,
-      });
     }
+    if (subcommand === "remove") {
+      const warnId = options.getInteger("id");
+      console.log(data.warnings[warnId - 1]);
+
+      data.warnings.splice(warnId - 1, 1);
+
+      console.log(data);
+      embed = buildEmbed(
+        `**Warn removed successfully :white_check_mark:**\n**User:** <@${target.id}>\n**Reason:** ${reason}\n**Warn Id:**${warnId}\n **Staff:** ${user.username}`
+      );
+    }
+    await data.save();
+
+    await logEvent(interaction, embed);
+
+    await interaction.reply({ embeds: [embed] });
   },
 };

@@ -36,7 +36,7 @@ module.exports = {
                 (w, i) =>
                   `**Warning ${i + 1}:**\n > **Staff:** ${
                     w.ExecuterTag
-                  }\n > **Reason:** ${w.Reason}\n`
+                  }\n > **Reason:** ${w.Reason}\n **Warn ID: ${w.warnId}`
               )
               .join("\n")}`
           );

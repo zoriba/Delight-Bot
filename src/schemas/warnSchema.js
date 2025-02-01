@@ -9,6 +9,7 @@ let warningSchema = new Schema({
       ExecuterId: String,
       ExecuterTag: String,
       Reason: String,
+      warnId: Number,
     },
   ],
 });
