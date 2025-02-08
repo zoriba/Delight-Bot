@@ -5,7 +5,7 @@ const { buildEmbed } = require("../../utils/embeds.js");
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName("setup")
+    .setName("setuplogs")
     .setDescription("setup the logs channel for the server")
     .addChannelOption((option) =>
       option

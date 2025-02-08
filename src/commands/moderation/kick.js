@@ -48,11 +48,11 @@ module.exports = {
       `**Server:** ${guild.name}\n **Reason:** ${reason}\n **Staff:** ${user.tag}`,
       "The User Has Been Kicked"
     );
-    await memberKick.send({ embeds: [embed] }).catch((err) => {
+    await memberKick.send({ embeds: [embedDM] }).catch((err) => {
       console.log(
-        chalk.redBright(
-          `[${guild.name}] Could not send DM to user while kicking: \n`
-        ) + err
+        chalk.redBright(`[${guild.name}] `) +
+          "Could not send DM to user while kicking:" +
+          err
       );
     });
 

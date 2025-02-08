@@ -56,20 +56,20 @@ module.exports = {
         value: "Remove a role from A Server Member",
       })
       .addFields({ name: "/kick", value: "Kick A Server Member" })
-      .addFields({ name: "/ban", value: "Ban a user from the server" })
-      .addFields({ name: "/unban", value: "Unban a user from the server" })
+      .addFields({ name: "/ban add", value: "Ban a user from the server" })
+      .addFields({ name: "/ban remove", value: "Unban a user from the server" })
       .addFields({
         name: "/purge",
         value: "Purge a certain amount of messages in a channel",
       })
       .addFields({ name: "/timeout", value: "Timeout a Server Member" })
       .addFields({
-        name: "/untimeout",
+        name: "/timeout remove",
         value: "Remove the timeout of a Server Member",
       })
       .addFields({ name: "/warn", value: "Warn a user" })
       .addFields({
-        name: "/setup",
+        name: "/setuplogs",
         value: "Setup the logs channel for the server",
       })
       .setTimestamp();
