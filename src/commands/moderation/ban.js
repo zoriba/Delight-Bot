@@ -78,7 +78,7 @@ module.exports = {
           });
         });
     }
-    if (subcommand === "unban") {
+    if (subcommand === "remove") {
       const member = interaction.options.getString("user");
       const embed = buildEmbed(
         `**Server:** ${interaction.guild.name}\n **Staff:** ${interaction.user.username}`,
